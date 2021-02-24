@@ -1,11 +1,21 @@
 import { createContext, ReactNode, useState } from "react";
+import challenges from '../../challenges.json'
+
+interface Challenge {
+  type: 'body' | 'eye'
+  description: string
+  amount: number
+}
 
 interface ChallengesContextData {
   level: number
   currentExperience: number
+  experienceToNextLevel: number
   challengesCompleted: number
+  activeChallenge: Challenge
   levelUp: () => void
   startNewChallenge: () => void
+  resetChallenge: () => void
 }
 
 interface ChallengesProviderProps {
@@ -19,12 +29,24 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
   const [currentExperience, setCurrentExperience] = useState(0)
   const [challengesCompleted, setChallengesCompleted] = useState(0)
 
+  const [activeChallenge, setActiveChallenge] = useState(null)
+
+  const experienceToNextLevel = Math.pow((level + 1) * 4, 2) // Cálculo que os rpg's usam para calcular a experiência que falta para o próximo level.
+  //Obs: 4 é o fator de experiência que pode ser aumentado ou diminuído baseado se será mais difícil ou mais fácil para upar para o level.
+
   function levelUp() {
     setLevel(level + 1)
   }
 
   function startNewChallenge() {
-    console.log('New challenge')
+    const randomChallengeIndex = Math.floor(Math.random() * challenges.length)
+    const challenge = challenges[randomChallengeIndex]
+
+    setActiveChallenge(challenge)
+  }
+
+  function resetChallenge() {
+    setActiveChallenge(null)
   }
 
   return (
@@ -32,9 +54,12 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
       value={{
         level,
         currentExperience,
+        experienceToNextLevel,
         challengesCompleted,
+        activeChallenge,
         levelUp,
-        startNewChallenge
+        startNewChallenge,
+        resetChallenge
       }}
     >
       { children }
