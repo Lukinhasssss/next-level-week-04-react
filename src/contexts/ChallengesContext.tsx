@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import challenges from '../../challenges.json'
 
 interface Challenge {
@@ -35,6 +35,11 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
   const experienceToNextLevel = Math.pow((level + 1) * 4, 2) // Cálculo que os rpg's usam para calcular a experiência que falta para o próximo level.
   //Obs: 4 é o fator de experiência que pode ser aumentado ou diminuído baseado se será mais difícil ou mais fácil para upar para o level.
 
+  useEffect(() => {
+    // Pedindo permissões para mandar notificações
+    Notification.requestPermission()
+  }, [])
+
   function levelUp() {
     setLevel(level + 1)
   }
@@ -44,6 +49,14 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
     const challenge = challenges[randomChallengeIndex]
 
     setActiveChallenge(challenge)
+
+    new Audio('/notification.mp3').play()
+
+    if (Notification.permission === 'granted') {
+      new Notification('Novo desafio 🎉', {
+        body: `Valendo ${challenge.amount}xp!`
+      })
+    }
   }
 
   function resetChallenge() {
